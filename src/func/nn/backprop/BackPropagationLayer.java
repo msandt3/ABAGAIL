@@ -1,6 +1,6 @@
 package func.nn.backprop;
 
-import func.nn.feedfwd.FeedForwardLayer;
+import func.nn.FeedForwardLayer;
 
 /**
  * A layer in a backpropagation network

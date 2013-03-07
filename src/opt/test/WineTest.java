@@ -10,25 +10,21 @@ import func.nn.backprop.*;
 import java.util.*;
 import java.io.*;
 import java.text.*;
-
 /**
- * Implementation of randomized hill climbing, simulated annealing, and genetic algorithm to
- * find optimal weights to a neural network that is classifying abalone as having either fewer 
- * or more than 15 rings. 
- *
- * @author Hannah Lau
- * @version 1.0
- */
-public class AbaloneTest {
-    private static Instance[] instances = initializeInstances();
+* Implementation of RHC, Simulated Annealing, and Genetic Algorithms for use in determining
+* neural network weights. Binary classification problem.
+* @Author - Michael Sandt - based on original class AbaloneTest by Hannah Lau
+**/
+public class WineTest{
+	//set up our data set
+	private static DataSetReader reader = new DataSetReader("datasets/wine.arff");
+	private static DataSet set;
 
-    private static int inputLayer = 7, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+	private static int inputLayer = 11, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
-    
+
     private static ErrorMeasure measure = new SumOfSquaresError();
-
-    private static DataSet set = new DataSet(instances);
-
+    //arrays for networks and their respective optimization problems
     private static BackPropagationNetwork networks[] = new BackPropagationNetwork[3];
     private static NeuralNetworkOptimizationProblem[] nnop = new NeuralNetworkOptimizationProblem[3];
 
@@ -38,17 +34,28 @@ public class AbaloneTest {
 
     private static DecimalFormat df = new DecimalFormat("0.000");
 
-    public static void main(String[] args) {
-        for(int i = 0; i < oa.length; i++) {
+
+    public static void main(String[] args){
+    	//read in the file for our data set
+    	try{
+    		set = reader.readarff();
+    	}catch(Exception e){
+    		System.out.println("Error reading in file, make sure the"+
+    			"arff file is in the appropriate directory");
+    		e.printStackTrace();
+    	}
+
+    	//set up the networks and optimization problems
+    	for(int i = 0; i < oa.length; i++) {
             networks[i] = factory.createClassificationNetwork(
                 new int[] {inputLayer, hiddenLayer, outputLayer});
             nnop[i] = new NeuralNetworkOptimizationProblem(set, networks[i], measure);
         }
-
+        //set up the optimization algorithms
         oa[0] = new RandomizedHillClimbing(nnop[0]);
         oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1]);
         oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2]);
-
+        //train the networks and run them on the data set
         for(int i = 0; i < oa.length; i++) {
             double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
             train(oa[i], networks[i], oaNames[i]); //trainer.train();
@@ -61,11 +68,11 @@ public class AbaloneTest {
 
             double predicted, actual;
             start = System.nanoTime();
-            for(int j = 0; j < instances.length; j++) {
-                networks[i].setInputValues(instances[j].getData());
+            for(int j = 0; j < set.size(); j++) {
+                networks[i].setInputValues(set.get(j).getData());
                 networks[i].run();
 
-                predicted = Double.parseDouble(instances[j].getLabel().toString());
+                predicted = Double.parseDouble(set.get(j).getLabel().toString());
                 actual = Double.parseDouble(networks[i].getOutputValues().toString());
 
                 double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
@@ -84,6 +91,7 @@ public class AbaloneTest {
         System.out.println(results);
     }
 
+
     private static void train(OptimizationAlgorithm oa, BackPropagationNetwork network, String oaName) {
         System.out.println("\nError results for " + oaName + "\n---------------------------");
 
@@ -91,52 +99,16 @@ public class AbaloneTest {
             oa.train();
 
             double error = 0;
-            for(int j = 0; j < instances.length; j++) {
-                network.setInputValues(instances[j].getData());
+            for(int j = 0; j < set.size(); j++) {
+                network.setInputValues(set.get(j).getData());
                 network.run();
 
-                Instance output = instances[j].getLabel(), example = new Instance(network.getOutputValues());
+                Instance output = set.get(j).getLabel(), example = new Instance(network.getOutputValues());
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
             }
 
             System.out.println(df.format(error));
         }
-    }
-
-    private static Instance[] initializeInstances() {
-
-        double[][][] attributes = new double[4177][][];
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("datasets/abalone.txt")));
-
-            for(int i = 0; i < attributes.length; i++) {
-                Scanner scan = new Scanner(br.readLine());
-                scan.useDelimiter(",");
-
-                attributes[i] = new double[2][];
-                attributes[i][0] = new double[7]; // 7 attributes
-                attributes[i][1] = new double[1];
-
-                for(int j = 0; j < 7; j++)
-                    attributes[i][0][j] = Double.parseDouble(scan.next());
-
-                attributes[i][1][0] = Double.parseDouble(scan.next());
-            }
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        Instance[] instances = new Instance[attributes.length];
-
-        for(int i = 0; i < instances.length; i++) {
-            instances[i] = new Instance(attributes[i][0]);
-            // classifications range from 0 to 30; split into 0 - 14 and 15 - 30
-            instances[i].setLabel(new Instance(attributes[i][1][0] < 15 ? 0 : 1));
-        }
-
-        return instances;
     }
 }
