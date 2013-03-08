@@ -7,9 +7,12 @@ import opt.ga.*;
 import shared.*;
 import func.nn.backprop.*;
 
+
 import java.util.*;
 import java.io.*;
 import java.text.*;
+
+import org.apache.commons.cli.*;
 /**
 * Implementation of RHC, Simulated Annealing, and Genetic Algorithms for use in determining
 * neural network weights. Binary classification problem.
@@ -20,7 +23,9 @@ public class WineTest{
 	private static DataSetReader reader = new DataSetReader("datasets/wine.arff");
 	private static DataSet set;
 
-	private static int inputLayer = 11, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+	private static int inputLayer = 11, hiddenLayer = 5, outputLayer = 1;
+    private static int trainingIterations,population,mutation,mate;
+    private static double temp,cool;
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
 
     private static ErrorMeasure measure = new SumOfSquaresError();
@@ -34,9 +39,14 @@ public class WineTest{
 
     private static DecimalFormat df = new DecimalFormat("0.000");
 
+    private static CommandLineParser parser = new BasicParser();
+    private static Options options = new Options();
+
 
     public static void main(String[] args){
-    	//read in the file for our data set
+    	//read in data set file
+        setUpArgs();
+        parseArgs(args);
     	try{
     		set = reader.readarff();
     	}catch(Exception e){
@@ -110,5 +120,65 @@ public class WineTest{
 
             System.out.println(df.format(error));
         }
+    }
+
+    private static void setUpArgs(){
+        //set up command line args
+        options.addOption("n",true,"set number of training iterations -- default 1000");
+        //args for GA
+        options.addOption("p",true,"set genetic algorithm population size -- default 200");
+        options.addOption("m",true,"set number of instances to mate each iteration -- default 100");
+        options.addOption("u",true,"set number of instance to mutate each iteration -- default 10");
+        //args for SA
+        options.addOption("t",true,"set the starting temperature for simulated annealing -- default 1E11");
+        options.addOption("c",true,"set the cooling rate for simulated annealing -- default 0.95");
+    }
+
+    private static void parseArgs(String[] args){
+        CommandLine line = null;
+        try{
+            line = parser.parse(options,args);
+        }catch(org.apache.commons.cli.ParseException e){
+            System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+        }
+
+        //need to parse these as appropriate data types
+        String ti = line.getOptionValue("n");
+        String pop = line.getOptionValue("p");
+        String ma = line.getOptionValue("m");
+        String mut = line.getOptionValue("u");
+        String t = line.getOptionValue("t");
+        String c = line.getOptionValue("c");
+
+
+        if(ti == null)
+            trainingIterations = 1000;
+        else
+            trainingIterations = Integer.parseInt(ti);
+
+        if(pop == null)
+            population = 200;
+        else
+            population = Integer.parseInt(pop);
+
+        if(ma == null)
+            mate = 100;
+        else
+            mate = Integer.parseInt(ma);
+
+        if(mut == null)
+            mutation = 10;
+        else
+            mutation = Integer.parseInt(mut);
+
+        if(t == null)
+            temp = (Double)1E11;
+        else
+            temp = Double.parseDouble(t);
+
+        if(c == null)
+            cool = (Double)0.95;
+        else
+            cool = Double.parseDouble(c);
     }
 }

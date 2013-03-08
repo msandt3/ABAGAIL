@@ -40,8 +40,15 @@
 
 	<target name = "all" depends = "compile,jar"/>
 
-	<target name = "run" depends = "compile,jar">
-		<java classname="opt.test.WineTest" dir="${build}" failonerror="false" fork="true"/>
+	<target name = "run" depends = "compile,jar,input-runargs">
+		<java classname="opt.test.WineTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+
+	<target name="input-runargs" unless="args" description="prompts for command line args">
+		<input addProperty="args" message="Type the desired command line arguments:"/>
 	</target>
 
 	<target name = "runabalone" depends = "compile,jar">
