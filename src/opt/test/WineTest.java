@@ -24,7 +24,7 @@ public class WineTest{
 	private static DataSet set;
 
 	private static int inputLayer = 11, hiddenLayer = 5, outputLayer = 1;
-    private static int trainingIterations,population,mutation,mate;
+    private static int trainingIterations,population,mutation,mate,experiments;
     private static double temp,cool;
     private static BackPropagationNetworkFactory factory = new BackPropagationNetworkFactory();
 
@@ -36,11 +36,17 @@ public class WineTest{
     private static OptimizationAlgorithm[] oa = new OptimizationAlgorithm[3];
     private static String[] oaNames = {"RHC", "SA", "GA"};
     private static String results = "";
+    private static String avgResults = "";
 
     private static DecimalFormat df = new DecimalFormat("0.000");
 
     private static CommandLineParser parser = new BasicParser();
     private static Options options = new Options();
+
+    private static double[] avgCorrect = new double[3];
+    private static double[] avgIncorrect = new double[3];
+    private static double[] avgTrain = new double[3];
+    private static double[] avgTest = new double[3];
 
 
     public static void main(String[] args){
@@ -54,51 +60,74 @@ public class WineTest{
     			"arff file is in the appropriate directory");
     		e.printStackTrace();
     	}
-
+        for(int k=0; k<experiments; k++){
     	//set up the networks and optimization problems
-    	for(int i = 0; i < oa.length; i++) {
-            networks[i] = factory.createClassificationNetwork(
-                new int[] {inputLayer, hiddenLayer, outputLayer});
-            nnop[i] = new NeuralNetworkOptimizationProblem(set, networks[i], measure);
-        }
-        //set up the optimization algorithms
-        oa[0] = new RandomizedHillClimbing(nnop[0]);
-        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1]);
-        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2]);
-        //train the networks and run them on the data set
-        for(int i = 0; i < oa.length; i++) {
-            double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
-            train(oa[i], networks[i], oaNames[i]); //trainer.train();
-            end = System.nanoTime();
-            trainingTime = end - start;
-            trainingTime /= Math.pow(10,9);
-
-            Instance optimalInstance = oa[i].getOptimal();
-            networks[i].setWeights(optimalInstance.getData());
-
-            double predicted, actual;
-            start = System.nanoTime();
-            for(int j = 0; j < set.size(); j++) {
-                networks[i].setInputValues(set.get(j).getData());
-                networks[i].run();
-
-                predicted = Double.parseDouble(set.get(j).getLabel().toString());
-                actual = Double.parseDouble(networks[i].getOutputValues().toString());
-
-                double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
-
+            results = "";
+        	for(int i = 0; i < oa.length; i++) {
+                networks[i] = factory.createClassificationNetwork(
+                    new int[] {inputLayer, hiddenLayer, outputLayer});
+                nnop[i] = new NeuralNetworkOptimizationProblem(set, networks[i], measure);
             }
-            end = System.nanoTime();
-            testingTime = end - start;
-            testingTime /= Math.pow(10,9);
+            //set up the optimization algorithms
+            oa[0] = new RandomizedHillClimbing(nnop[0]);
+            oa[1] = new SimulatedAnnealing(temp, cool, nnop[1]);
+            oa[2] = new StandardGeneticAlgorithm(population, mate, mutation, nnop[2]);
+            //train the networks and run them on the data set
+            for(int i = 2; i < oa.length; i++) {
+                double start = System.nanoTime(), end, trainingTime, testingTime, correct = 0, incorrect = 0;
+                train(oa[i], networks[i], oaNames[i]); //trainer.train();
+                end = System.nanoTime();
+                trainingTime = end - start;
+                trainingTime /= Math.pow(10,9);
 
-            results +=  "\nResults for " + oaNames[i] + ": \nCorrectly classified " + correct + " instances." +
-                        "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
-                        + df.format(correct/(correct+incorrect)*100) + "%\nTraining time: " + df.format(trainingTime)
-                        + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n";
+                Instance optimalInstance = oa[i].getOptimal();
+                networks[i].setWeights(optimalInstance.getData());
+
+                double predicted, actual;
+                start = System.nanoTime();
+                for(int j = 0; j < set.size(); j++) {
+                    networks[i].setInputValues(set.get(j).getData());
+                    networks[i].run();
+
+                    predicted = Double.parseDouble(set.get(j).getLabel().toString());
+                    actual = Double.parseDouble(networks[i].getOutputValues().toString());
+
+                    double trash = Math.abs(predicted - actual) < 0.5 ? correct++ : incorrect++;
+
+                }
+                end = System.nanoTime();
+                testingTime = end - start;
+                testingTime /= Math.pow(10,9);
+
+                avgCorrect[i] += correct;
+                avgIncorrect[i] += incorrect;
+                avgTrain[i] += trainingTime;
+                avgTest[i] += testingTime;
+
+                results +=  "\nResults for " + oaNames[i] + ": \nCorrectly classified " + correct + " instances." +
+                            "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
+                            + df.format(correct/(correct+incorrect)*100) + "%\nTraining time: " + df.format(trainingTime)
+                            + " seconds\nTesting time: " + df.format(testingTime) + " seconds\n";
+            }
+
+            System.out.println(results);
         }
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        //print out average results from all experiments
+        for(int q=2; q<3; q++){
+            avgResults = "";
+            String avgCor = df.format(avgCorrect[q]/(double)experiments);
+            String avgIncor = df.format(avgIncorrect[q]/(double)experiments);
+            String avgPctCor = df.format(avgCorrect[q]/(avgCorrect[q]+avgIncorrect[q])*100);
+            String avgTrainTime = df.format(avgTrain[q]/(double)experiments);
+            String avgTestTime = df.format(avgTest[q]/(double)experiments);
+            avgResults +=  "\nAvg Results for " + oaNames[q] + ": \nAvg Correctly classified " + avgCor + " instances." +
+                            "\nAvg Incorrectly classified " + avgIncor + " instances.\nPercent correctly classified: "
+                            + avgPctCor + "%\nTraining time: " + avgTrainTime
+                            + " seconds\nTesting time: " + avgTestTime + " seconds\n";
 
-        System.out.println(results);
+            System.out.println(avgResults);
+        }
     }
 
 
@@ -118,7 +147,7 @@ public class WineTest{
                 error += measure.value(output, example);
             }
 
-            System.out.println(df.format(error));
+            //System.out.println(df.format(error));
         }
     }
 
@@ -132,6 +161,7 @@ public class WineTest{
         //args for SA
         options.addOption("t",true,"set the starting temperature for simulated annealing -- default 1E11");
         options.addOption("c",true,"set the cooling rate for simulated annealing -- default 0.95");
+        options.addOption("e",true,"the number of experiments to perform");
     }
 
     private static void parseArgs(String[] args){
@@ -149,6 +179,7 @@ public class WineTest{
         String mut = line.getOptionValue("u");
         String t = line.getOptionValue("t");
         String c = line.getOptionValue("c");
+        String exp = line.getOptionValue("e");
 
 
         if(ti == null)
@@ -180,5 +211,10 @@ public class WineTest{
             cool = (Double)0.95;
         else
             cool = Double.parseDouble(c);
+
+        if(exp == null)
+            experiments = 1;
+        else
+            experiments = Integer.parseInt(exp);
     }
 }

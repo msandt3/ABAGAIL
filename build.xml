@@ -46,6 +46,24 @@
 		</java>
 	</target>
 
+	<target name = "run-ts" depends = "compile,jar,input-runargs">
+		<java classname="opt.test.TravelingSalesmanTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+	<target name = "run-ks" depends = "compile,jar,input-runargs">
+		<java classname="opt.test.KnapsackTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+	<target name = "run-cp" depends = "compile,jar,input-runargs">
+		<java classname="opt.test.ContinuousPeaksTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
 
 	<target name="input-runargs" unless="args" description="prompts for command line args">
 		<input addProperty="args" message="Type the desired command line arguments:"/>
