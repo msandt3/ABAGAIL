@@ -8,6 +8,7 @@
 		<!-- Set up build directories -->
 		<mkdir dir="${build}"/>
 		<mkdir dir="${build}/datasets"/>
+		<mkdir dir="${build}/datasets/results"/>
 		<!-- Compile source code -->
 		<javac srcdir="${src}" destdir="${build}"/>
 
@@ -16,6 +17,11 @@
 				<fileset dir="${src}/datasets" includes="**/*.arff,**/*.txt"/>
 		</copy>
 
+		<!-- Copy over result files 
+		<copy todir="${build}/datasets/results">
+				<fileset dir="${src}/datasets/results" includes="**/*.txt"/>
+		</copy>
+		-->
 	</target>
 	
 
@@ -63,6 +69,34 @@
 			<arg line="${args}"/>
 		</java>
 	</target>
+
+	<target name = "run-kmc" depends = "compile,jar,input-runargs">
+		<java classname="project3.KMeansClusteringTest" dir="${build}" failonerror="true" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+	<target name = "run-em" depends = "compile,jar">
+		<java classname="project3.ExMinimizationTest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
+
+	<target name = "run-pca" depends = "compile,jar">
+		<java classname="project3.PCATest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
+
+	<target name = "run-ica" depends = "compile,jar">
+		<java classname="project3.ICATest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
+
+	<target name = "run-lda" depends = "compile,jar">
+		<java classname="project3.LDATest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
+
+	<target name = "run-rp" depends = "compile,jar">
+		<java classname="project3.RandomizedProjectionTest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
+
+
 
 
 	<target name="input-runargs" unless="args" description="prompts for command line args">
