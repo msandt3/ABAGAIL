@@ -1,0 +1,15 @@
+!SESSION 2013-03-31 18:10:37.746 -----------------------------------------------
+eclipse.buildId=I20110613-1736
+java.version=1.6.0_27
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86_64
+
+!ENTRY org.eclipse.mylyn.tasks.ui 2 0 2013-03-31 18:10:53.400
+!MESSAGE No search provider was registed. Tasks search is not available.
+
+!ENTRY com.android.ide.eclipse.adt 2 0 2013-03-31 18:10:58.061
+!MESSAGE An Android SDK is already being loaded. Please try again later.
+
+!ENTRY org.eclipse.ui 4 4 2013-03-31 18:11:45.899
+!MESSAGE Invalid preference page path: XML Syntax

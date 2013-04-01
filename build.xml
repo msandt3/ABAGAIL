@@ -80,13 +80,31 @@
 		<java classname="project3.ExMinimizationTest" dir="${build}" failonerror="false" fork="true"/>
 	</target>
 
-	<target name = "run-pca" depends = "compile,jar">
-		<java classname="project3.PCATest" dir="${build}" failonerror="false" fork="true"/>
+	<target name = "run-pca" depends = "compile,jar,input-runargs">
+		<java classname="project3.PCATest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
 	</target>
 
-	<target name = "run-ica" depends = "compile,jar">
-		<java classname="project3.ICATest" dir="${build}" failonerror="false" fork="true"/>
+	<target name = "run-pca-cs" depends = "compile,jar,input-runargs">
+		<java classname="project3.PCATestCrossVal" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
 	</target>
+
+	<target name = "run-ica" depends = "compile,jar,input-runargs">
+		<java classname="project3.ICATest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+	<target name = "run-ica-cs" depends = "compile,jar,input-runargs">
+		<java classname="project3.ICATestCrossVal" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+
 
 	<target name = "run-lda" depends = "compile,jar">
 		<java classname="project3.LDATest" dir="${build}" failonerror="false" fork="true"/>

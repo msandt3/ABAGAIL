@@ -1,0 +1,185 @@
+		KMeansClusterer w_kmc = new KMeansClusterer(WINE_K);
+		KMeansClusterer s_kmc = new KMeansClusterer(SPAM_K);
+
+		Double tot_w_avg_correct = (double)0;
+		Double tot_s_avg_correct = (double)0;
+		Double tot_w_var = (double)0;
+		Double tot_s_var = (double)0;
+		Double tot_w_dist = (double)0;
+		Double tot_s_dist = (double)0;
+		System.out.println("Cross val");
+		//10 fold cross val
+		for(int n=0; n<10; n++){
+
+			/** REPRODUCING CLUSTERING EXPERIMENTS **/
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~~~~~~~ RUNNING CLUSTERING ON REDUCED WINE SET ~~~~~~~~~~~~~~~~");
+			
+			w_kmc.estimate(wine_set);
+			System.out.println("estimated wine");
+			Double[] w_clusters = new Double[WINE_K];
+			Double[] w_dists = new Double[WINE_K];
+			Arrays.fill(w_clusters,(double)0);
+			Arrays.fill(w_dists,(double)0);
+			Double avg_dist = (double)0;
+			int cluster;
+
+			//System.out.println("~~~~~~~ Mean distance by cluster classification ~~~~~~~");
+			double running_total_dist = 0;
+			double total_dist = 0;
+			double total_items = 0;
+			double correct = 0;
+
+			EuclideanDistance d_measure = new EuclideanDistance();
+			//for every cluster center
+			String ret = "";
+			for(int i=0; i<w_kmc.getClusterCenters().length; i++){
+
+
+				ret += "Mean distance from cluster - "+i;
+				//for every instance
+
+
+				for(int j=0; j<wine_set.size(); j++){
+					
+					cluster = (int)Double.parseDouble(w_kmc.value(wine_set.get(j)).toString());
+
+					//if the instance belongs to the cluster
+					if(cluster == i){
+						//increment total distance by dist and increment total items
+						double expected = Double.parseDouble(w_kmc.getClusterCenters()[i].getLabel().toString());
+						double actual = Double.parseDouble(wine_set.get(j).getLabel().toString());
+						if(expected == actual)
+							correct++;
+						total_dist += d_measure.value(wine_set.get(j),w_kmc.getClusterCenters()[i]);
+						total_items++;
+					}
+				}
+
+
+				double avg = 0;
+				if(total_items != 0){
+					avg = total_dist/total_items;
+				}
+				ret += " is - "+(avg);
+				running_total_dist += avg;
+				w_dists[i] = avg;
+				total_dist = 0;
+				total_items = 0;
+				ret += "\n\n";
+			}
+
+
+			//System.out.println("~~~~~~~ AVERAGE DIST OVER ALL CLUSTERS ~~~~~~~~");
+			avg_dist = running_total_dist/WINE_K;
+			tot_w_dist += avg_dist;
+			//System.out.println(avg_dist);
+
+			//System.out.println("~~~~~~~ Average variance in distance measure ~~~~~~~");
+			double total_var = 0;
+			for(int i=0; i<w_dists.length; i++){
+				total_var += Math.pow((w_dists[i] - avg_dist),2);
+			}
+			tot_w_var += total_var/WINE_K;
+			//System.out.println(total_var/WINE_K);
+
+
+			//System.out.println("~~~~~~~ CORRECT CLASSIFICATIONS ~~~~~~~");
+			tot_w_avg_correct += correct/wine_set.size() * (double)100;
+			//System.out.println(correct/wine_set.size() * (double)100);
+			//System.out.println("WINE SET SIZE -- "+wine_set.size());
+
+
+
+
+
+
+			/** ~~~~~~~~~~~~~~~~~~~~~~~ SPAM SET ~~~~~~~~~~~~~~~~~~~~ **/
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~~~~~~~ RUNNING CLUSTERING ON REDUCED SPAM SET ~~~~~~~~~~~~~~~~");
+			s_kmc.estimate(spam_set);
+			Double[] s_clusters = new Double[SPAM_K];
+			Double[] s_dists = new Double[SPAM_K];
+			avg_dist = (double)0;
+			Arrays.fill(s_dists,(double)0);
+			Arrays.fill(s_clusters,(double)0);
+
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~ Mean distance by cluster classification ~~~~~~~");
+			running_total_dist = 0;
+			total_dist = 0;
+			total_items = 0;
+			correct = 0;
+
+			ret = "";
+			for(int i=0; i<s_kmc.getClusterCenters().length; i++){
+
+
+				ret += "Mean distance from cluster - "+i;
+				//for every instance
+
+
+				for(int j=0; j<spam_set.size(); j++){
+					
+					cluster = (int)Double.parseDouble(s_kmc.value(spam_set.get(j)).toString());
+
+					//if the instance belongs to the cluster
+					if(cluster == i){
+						//increment total distance by dist and increment total items
+						double expected = Double.parseDouble(s_kmc.getClusterCenters()[i].getLabel().toString());
+						double actual = Double.parseDouble(spam_set.get(j).getLabel().toString());
+						if(expected == actual)
+							correct++;
+
+						total_dist += d_measure.value(spam_set.get(j),s_kmc.getClusterCenters()[i]);
+						total_items++;
+					}
+				}
+				double avg = 0;
+				if(total_items != 0){
+					avg = total_dist/total_items;
+				}
+				ret += " is - "+(avg);
+				running_total_dist += avg;
+				s_dists[i] = avg;
+				total_dist = 0;
+				total_items = 0;
+				ret += "\n\n";
+			}
+			//System.out.println(ret);
+			
+
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~ AVERAGE DIST OVER ALL CLUSTERS ~~~~~~~~");
+			avg_dist = running_total_dist/SPAM_K;
+			tot_s_dist += avg_dist;
+			//System.out.println(avg_dist);
+
+
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~ Average variance in distance measure ~~~~~~~");
+			total_var = 0;
+			for(int i=0; i<s_dists.length; i++){
+				total_var += Math.pow((s_dists[i] - avg_dist),2);
+			}
+			tot_s_var += total_var/SPAM_K;
+			//System.out.println(total_var/SPAM_K);
+
+			//System.out.println("\n\n\n");
+			//System.out.println("~~~~~~~ CORRECT CLASSIFICATIONS ~~~~~~~");
+			tot_s_avg_correct += correct/spam_set.size() * (double)100;
+			//System.out.println(correct/spam_set.size() * (double)100);
+			//System.out.println("\n\n\n");
+			//System.out.println("SPAM SET SIZE - "+spam_set.size());
+		}
+		System.out.println("##############################################");
+		System.out.println("FINAL CROSS VALIDATED STATS - WINE SET");
+		System.out.println("AVERAGE DISTANCE - "+tot_w_dist/(double)10);
+		System.out.println("AVERAGE VARIANCE - "+tot_w_var/(double)10);
+		System.out.println("AVERAGE CORRECT - "+tot_w_avg_correct/(double)10);
+		System.out.println("\n\n\n");
+		System.out.println("FINAL CROSS VALIDATED STATS - SPAM SET");
+		System.out.println("AVERAGE DISTANCE - "+tot_s_dist/(double)10);
+		System.out.println("AVERAGE VARIANCE - "+tot_s_var/(double)10);
+		System.out.println("AVERAGE CORRECT - "+tot_s_avg_correct/(double)10);
+		System.out.println("\n\n\n");

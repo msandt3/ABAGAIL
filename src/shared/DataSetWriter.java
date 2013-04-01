@@ -3,6 +3,8 @@ package shared;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  * A class for writing data sets
@@ -20,6 +22,7 @@ public class DataSetWriter {
      */
     private String filename;
 
+
     /**
      * Make a new data set writer
      * @param set the data set to writer
@@ -35,6 +38,37 @@ public class DataSetWriter {
      */
     public void write() throws IOException {
         PrintWriter pw = new PrintWriter(new FileWriter(filename));
+        //write header to file first
+
+        for (int i = 0; i < set.size(); i++) {
+            Instance data = set.get(i);
+            while (data != null) {
+                for (int j = 0; j < data.size(); j++) {
+                    pw.print(data.getContinuous(j));
+                    if (j + 1 < data.size() || data.getLabel() != null) {
+                        pw.print(", ");
+                    }
+                }
+                data = data.getLabel();
+            }
+            pw.println();
+        }
+        pw.close();
+    }
+
+
+    public void writeWithHeader(String headerfile) throws IOException {
+
+        PrintWriter pw = new PrintWriter(new FileWriter(filename));
+        //write header to file first
+        String cur_line;
+        FileReader reader = new FileReader(headerfile);
+        BufferedReader br = new BufferedReader(reader);
+        while((cur_line = br.readLine()) != null){
+            pw.println(cur_line);
+        }
+        reader.close();
+        
         for (int i = 0; i < set.size(); i++) {
             Instance data = set.get(i);
             while (data != null) {

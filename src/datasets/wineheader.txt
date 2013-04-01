@@ -1,0 +1,16 @@
+@relation training
+
+@attribute 'fixed acidity' numeric
+@attribute 'volatile acidity' numeric
+@attribute 'citric acid' numeric
+@attribute 'residual sugar' numeric
+@attribute chlorides numeric
+@attribute 'free sulfur dioxide' numeric
+@attribute 'total sulfur dioxide' numeric
+@attribute density numeric
+@attribute pH numeric
+@attribute sulphates numeric
+@attribute alcohol numeric
+@attribute quality {1.0,0.0}
+
+@data
