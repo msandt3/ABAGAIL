@@ -115,7 +115,13 @@
 	</target>
 
 
+	<target name="run-mdp" depends="compile,jar">
+		<java classname="rl.test.MazeMDPTest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
 
+	<target name="run-4x4" depends="compile,jar">
+		<java classname="rl.test.FourMazeTest" dir="${build}" failonerror="false" fork="true"/>
+	</target>
 
 	<target name="input-runargs" unless="args" description="prompts for command line args">
 		<input addProperty="args" message="Type the desired command line arguments:"/>

@@ -10,6 +10,9 @@ import rl.SarsaLambda;
 import rl.ValueIteration;
 import shared.FixedIterationTrainer;
 import shared.ThresholdTrainer;
+import shared.mazes.MazeGenerator;
+
+import java.io.File;
 
 /**
  * Tests out the maze markov decision process classes
@@ -23,9 +26,9 @@ public class MazeMDPTest {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        MazeMarkovDecisionProcess maze = MazeMarkovDecisionProcess.load("testmaze.txt");
+        MazeMarkovDecisionProcess maze = MazeMarkovDecisionProcess.load(new File("").getAbsolutePath() + 
+            "/datasets/4x4maze.txt");
         System.out.println(maze);
-        
         ValueIteration vi = new ValueIteration(.95, maze);
         ThresholdTrainer tt = new ThresholdTrainer(vi);
         long startTime = System.currentTimeMillis();
@@ -50,7 +53,7 @@ public class MazeMDPTest {
         System.out.println("and " + (finishTime - startTime) + " ms");
         System.out.println(mazeVis.toString(p));
         
-        int iterations = 50000;
+        int iterations = 500000000;
         QLambda ql = new QLambda(.5, .95, .2, 1, new EpsilonGreedyStrategy(.3), maze);
         FixedIterationTrainer fit = new FixedIterationTrainer(ql, iterations);
         startTime = System.currentTimeMillis();
