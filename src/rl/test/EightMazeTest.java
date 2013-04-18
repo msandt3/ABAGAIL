@@ -16,7 +16,7 @@ import java.io.File;
 
 import org.apache.commons.cli.*;
 
-public class  FourMazeTest {
+public class  EightMazeTest {
 
 	private static double GAMMA;
 
@@ -29,7 +29,7 @@ public class  FourMazeTest {
 		parseArgs(args);
 
 		MazeMarkovDecisionProcess maze = MazeMarkovDecisionProcess.load(new File("").getAbsolutePath() + 
-            "/datasets/4x4maze.txt");
+            "/datasets/8x8maze.txt");
 		MazeMarkovDecisionProcessVisualization mazeVis =
             new MazeMarkovDecisionProcessVisualization(maze);
 		System.out.println(maze);
