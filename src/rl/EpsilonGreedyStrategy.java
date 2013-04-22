@@ -7,7 +7,7 @@ import dist.Distribution;
  * @author Andrew Guillory gtg008g@mail.gatech.edu
  * @version 1.0
  */
-public class EpsilonGreedyStrategy implements ExplorationStrategy {
+public class EpsilonGreedyStrategy extends Strategy implements ExplorationStrategy {
     /**
      * The epsilon value
      */

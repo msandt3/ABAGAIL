@@ -132,6 +132,19 @@
 		</java>
 	</target>
 
+	<target name="run-4x4QL" depends="compile,jar,input-runargs">
+		<java classname="rl.test.FourQLearningTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+	<target name="run-8x8QL" depends="compile,jar,input-runargs">
+		<java classname="rl.test.EightQLearningTest" dir="${build}" failonerror="false" fork="true">
+			<arg line="${args}"/>
+		</java>
+	</target>
+
+
 	<target name="input-runargs" unless="args" description="prompts for command line args">
 		<input addProperty="args" message="Type the desired command line arguments:"/>
 	</target>
